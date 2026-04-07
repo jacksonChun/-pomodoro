@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="ko">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="theme-color" content="#ff875f" />
+        <title>Pomodoro</title>
+        <link rel="manifest" href="./manifest.webmanifest" />
+        <link rel="icon" type="image/png" sizes="32x32" href="./icons/icon-32.png" />
+        <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="./icons/apple-touch-icon-180.png" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&display=swap" rel="stylesheet" />
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script>
+            tailwind.config = {
+                theme: {
+                    extend: {
+                        fontFamily: {
+                            nunito: ['Nunito', 'sans-serif'],
+                        },
+                    },
+                },
+            };
+        </script>
+    </head>
+    <body
+        class="font-nunito min-h-screen w-full text-[#fffaf4] grid place-items-center bg-[radial-gradient(circle_at_15%_20%,rgba(255,255,255,0.28),transparent_33%),radial-gradient(circle_at_85%_75%,rgba(255,255,255,0.2),transparent_30%),linear-gradient(135deg,#ff9f9f,#ffc186_48%,#ffe2b8)] transition-all duration-500"
+    >
+        <main
+            id="appCard"
+            class="w-screen h-[100dvh] sm:w-[min(94vw,620px)] sm:h-auto sm:min-h-0 sm:rounded-[30px] bg-white/15 sm:border sm:border-white/40 px-3 py-3 sm:px-5 sm:py-10 text-center flex flex-col justify-center sm:justify-start backdrop-blur-0 sm:backdrop-blur-md shadow-none sm:shadow-[0_18px_44px_rgba(149,70,35,0.24)]"
+        >
+            <h1 class="text-3xl sm:text-4xl font-bold mb-5 sm:mb-10">Pomodoro</h1>
+            <section class="grid place-items-center my-2 sm:my-2" aria-label="타이머 다이얼">
+                <div
+                    class="relative w-[min(93vw,380px)] sm:w-[min(84vw,360px)] aspect-square rounded-[26px] p-[14px] bg-[linear-gradient(160deg,#fefefe,#f3f3f3)] border border-white/90 shadow-[0_14px_34px_rgba(0,0,0,0.18),inset_0_1px_8px_rgba(255,255,255,0.95)]"
+                >
+                    <svg
+                        id="dialSvg"
+                        class="w-full h-full rounded-[20px] bg-[linear-gradient(180deg,#fbfbfb_0%,#f2f3f6_100%)] [touch-action:none]"
+                        viewBox="0 0 320 320"
+                        aria-hidden="true"
+                    >
+                        <g id="dialTicks"></g>
+                        <g id="dialLabels"></g>
+                        <circle
+                            cx="160"
+                            cy="160"
+                            r="106"
+                            fill="none"
+                            stroke="rgba(35,41,52,0.1)"
+                            stroke-width="28"
+                        ></circle>
+                        <circle
+                            id="dialProgress"
+                            cx="160"
+                            cy="160"
+                            r="106"
+                            fill="none"
+                            stroke="#e4452e"
+                            stroke-width="28"
+                            stroke-linecap="butt"
+                            style="transform-origin: 160px 160px; transform: rotate(-90deg)"
+                        ></circle>
+                        <circle
+                            id="dialHit"
+                            cx="160"
+                            cy="160"
+                            r="106"
+                            fill="none"
+                            stroke="rgba(0,0,0,0.001)"
+                            stroke-width="44"
+                            style="pointer-events: all; cursor: pointer"
+                        ></circle>
+                        <line
+                            id="dialHand"
+                            x1="160"
+                            y1="160"
+                            x2="160"
+                            y2="54"
+                            stroke="#262b35"
+                            stroke-width="4"
+                            stroke-linecap="round"
+                        ></line>
+                    </svg>
+                    <div
+                        class="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[112px] h-[112px] sm:w-[130px] sm:h-[130px] rounded-full bg-[linear-gradient(180deg,#ffffff,#efefef)] border border-[#f7f7f7] shadow-[0_8px_18px_rgba(0,0,0,0.2),inset_0_3px_8px_rgba(255,255,255,0.9)] grid content-center justify-items-center gap-px"
+                    >
+                        <p
+                            id="dialMinute"
+                            class="m-0 text-[33px] sm:text-[38px] leading-none text-[#2b2f39] font-extrabold tabular-nums"
+                        >
+                            60
+                        </p>
+                        <p class="m-0 text-[12px] text-[#59606b] font-bold">min</p>
+                        <p id="dialTimeText" class="m-0 text-[11px] text-[#7b828f] font-bold tabular-nums">60:00</p>
+                    </div>
+                </div>
+            </section>
+
+            <p class="my-1 sm:my-2 text-[12px] sm:text-[13px] font-bold opacity-95" id="countText">
+                완료한 집중 세션: 0
+            </p>
+
+            <div class="flex justify-center flex-wrap gap-2 mb-2 sm:mb-5">
+                <button
+                    id="startPauseBtn"
+                    class="rounded-xl px-4 py-2 text-[13px] sm:text-[14px] font-extrabold text-white bg-[#ff875f] transition-colors duration-300"
+                >
+                    시작
+                </button>
+                <button
+                    id="stopBtn"
+                    class="rounded-xl px-4 py-2 text-[13px] sm:text-[14px] font-extrabold text-white bg-white/20 border border-white/35"
+                >
+                    종료
+                </button>
+                <button
+                    id="soundOpenBtn"
+                    type="button"
+                    aria-label="사운드 설정"
+                    title="사운드 설정"
+                    class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white/20 border border-white/35 text-white grid place-items-center"
+                >
+                    <svg viewBox="0 0 24 24" aria-hidden="true" class="w-5 h-5 fill-current">
+                        <path
+                            d="M14.6 4.3a1 1 0 0 1 .4.8v13.8a1 1 0 0 1-1.7.7l-4.5-4.6H5.5A2.5 2.5 0 0 1 3 12.5v-1A2.5 2.5 0 0 1 5.5 9h3.3l4.5-4.6a1 1 0 0 1 1.3-.1ZM17.8 8.3a1 1 0 0 1 1.4.2 6 6 0 0 1 0 7 1 1 0 0 1-1.6-1.2 4 4 0 0 0 0-4.6 1 1 0 0 1 .2-1.4Zm2.6-2.9a1 1 0 0 1 1.4.2 10 10 0 0 1 0 13.2 1 1 0 1 1-1.6-1.2 8 8 0 0 0 0-10.8 1 1 0 0 1 .2-1.4Z"
+                        />
+                    </svg>
+                </button>
+            </div>
+
+            <section
+                class="text-left grid gap-1 sm:gap-1.5 bg-white/20 rounded-xl sm:rounded-2xl p-2 sm:p-2.5 mt-2 sm:mt-auto"
+            >
+                <label for="workRange" class="text-[12px] sm:text-[13px] font-bold"
+                    >집중 <span id="workValue">60</span>분</label
+                >
+                <input
+                    id="workRange"
+                    type="range"
+                    min="1"
+                    max="60"
+                    step="1"
+                    value="60"
+                    class="w-full accent-white/80"
+                />
+
+                <label for="restRange" class="text-[12px] sm:text-[13px] font-bold"
+                    >휴식 <span id="restValue">10</span>분</label
+                >
+                <input
+                    id="restRange"
+                    type="range"
+                    min="1"
+                    max="60"
+                    step="1"
+                    value="10"
+                    class="w-full accent-white/80"
+                />
+            </section>
+        </main>
+
+        <div id="soundModal" class="hidden fixed inset-0 z-40 grid place-items-center p-4">
+            <div id="soundModalBackdrop" class="absolute inset-0 bg-[#151821]/40" aria-hidden="true"></div>
+            <section
+                id="soundModalPanel"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="soundModalTitle"
+                class="relative w-[min(92vw,360px)] rounded-2xl p-4 grid gap-2.5 bg-[#2a313f]/95 border border-white/20 shadow-[0_20px_40px_rgba(0,0,0,0.35)] text-[#fffaf4]"
+            >
+                <h2 id="soundModalTitle" class="m-0 text-[18px] leading-tight font-extrabold">알림 사운드</h2>
+                <label for="soundModalSelect" class="text-[13px] font-bold">집중 시작 사운드</label>
+                <select
+                    id="soundModalSelect"
+                    aria-label="알림 사운드 선택"
+                    class="w-full rounded-[10px] px-2.5 py-2 bg-white/20 border border-white/40 text-white font-bold"
+                >
+                    <option value="chime" selected class="text-[#222]">Chime</option>
+                    <option value="soft" class="text-[#222]">Soft Bell</option>
+                    <option value="bright" class="text-[#222]">Bright Glass</option>
+                </select>
+                <div class="flex justify-end gap-2 mt-1">
+                    <button
+                        id="soundModalPreviewBtn"
+                        type="button"
+                        class="rounded-xl px-4 py-2 text-[13px] font-extrabold text-white bg-white/20 border border-white/35"
+                    >
+                        미리듣기
+                    </button>
+                    <button
+                        id="soundModalCloseBtn"
+                        type="button"
+                        class="rounded-xl px-4 py-2 text-[13px] font-extrabold text-white bg-[#ff875f]"
+                    >
+                        닫기
+                    </button>
+                </div>
+            </section>
+        </div>
+
+        <script src="./script.js"></script>
+    </body>
+</html>
